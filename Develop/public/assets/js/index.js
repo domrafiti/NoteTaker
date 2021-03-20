@@ -1,3 +1,26 @@
+const fs = require('fs');
+const http = require('http');
+const express = require('express');
+const app = express();
+
+const PORT = process.env.PORT || 8080;
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+
+const server = http.createServer(handleRequest);
+
+//routing - GET STATEMENTS
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../html/home.html')));
+app.get('/tables', (req, res) => res.sendFile(path.join(__dirname, '../html/tables.html')));
+app.get('/reserve', (req, res) => res.sendFile(path.join(__dirname, '../html/reserve.html')));
+
+const handleRequest = (request, response) => {
+  // Send the below string to the client when the user visits the PORT URL
+  response.end(`It Works!! Path Hit: ${request.url}`);
+};
+
 let noteTitle;
 let noteText;
 let saveNoteBtn;
@@ -10,7 +33,18 @@ if (window.location.pathname === '/notes') {
   saveNoteBtn = document.querySelector('.save-note');
   newNoteBtn = document.querySelector('.new-note');
   noteList = document.querySelectorAll('.list-container .list-group');
-}
+};
+
+if (window.location.pathname === '/notes') {
+  saveNoteBtn.addEventListener('click', handleNoteSave);
+  newNoteBtn.addEventListener('click', handleNewNoteView);
+  noteTitle.addEventListener('keyup', handleRenderSaveBtn);
+  noteText.addEventListener('keyup', handleRenderSaveBtn);
+  ;
+};
+
+console.log(window.location.pathname);
+
 
 // Show an element
 const show = (elem) => {
@@ -25,6 +59,7 @@ const hide = (elem) => {
 // activeNote is used to keep track of the note in the textarea
 let activeNote = {};
 
+//------Need to review and connect to DB
 const getNotes = () =>
   fetch('/api/notes', {
     method: 'GET',
@@ -65,6 +100,7 @@ const renderActiveNote = () => {
 };
 
 const handleNoteSave = () => {
+  console.log("Save");
   const newNote = {
     title: noteTitle.value,
     text: noteText.value,
@@ -170,11 +206,5 @@ const renderNoteList = async (notes) => {
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
-if (window.location.pathname === '/notes') {
-  saveNoteBtn.addEventListener('click', handleNoteSave);
-  newNoteBtn.addEventListener('click', handleNewNoteView);
-  noteTitle.addEventListener('keyup', handleRenderSaveBtn);
-  noteText.addEventListener('keyup', handleRenderSaveBtn);
-}
 
 getAndRenderNotes();
