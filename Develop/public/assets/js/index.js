@@ -1,50 +1,16 @@
-const fs = require('fs');
-const http = require('http');
-const express = require('express');
-const app = express();
-
-const PORT = process.env.PORT || 8080;
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-
-const server = http.createServer(handleRequest);
-
-//routing - GET STATEMENTS
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../html/home.html')));
-app.get('/tables', (req, res) => res.sendFile(path.join(__dirname, '../html/tables.html')));
-app.get('/reserve', (req, res) => res.sendFile(path.join(__dirname, '../html/reserve.html')));
-
-const handleRequest = (request, response) => {
-  // Send the below string to the client when the user visits the PORT URL
-  response.end(`It Works!! Path Hit: ${request.url}`);
-};
-
 let noteTitle;
 let noteText;
 let saveNoteBtn;
 let newNoteBtn;
 let noteList;
 
-if (window.location.pathname === '/notes') {
+if (window.location.pathname === '/notes.html') {
   noteTitle = document.querySelector('.note-title');
   noteText = document.querySelector('.note-textarea');
   saveNoteBtn = document.querySelector('.save-note');
   newNoteBtn = document.querySelector('.new-note');
   noteList = document.querySelectorAll('.list-container .list-group');
-};
-
-if (window.location.pathname === '/notes') {
-  saveNoteBtn.addEventListener('click', handleNoteSave);
-  newNoteBtn.addEventListener('click', handleNewNoteView);
-  noteTitle.addEventListener('keyup', handleRenderSaveBtn);
-  noteText.addEventListener('keyup', handleRenderSaveBtn);
-  ;
-};
-
-console.log(window.location.pathname);
-
+}
 
 // Show an element
 const show = (elem) => {
@@ -59,34 +25,39 @@ const hide = (elem) => {
 // activeNote is used to keep track of the note in the textarea
 let activeNote = {};
 
-//------Need to review and connect to DB
-const getNotes = () =>
-  fetch('/api/notes', {
+const getNotes = () => {
+  return fetch('/api/notes', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-  });
+  })
+};
 
-const saveNote = (note) =>
-  fetch('/api/notes', {
+const saveNote = (note) => {
+  return fetch('/api/notes', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(note),
-  });
+  })
+};
 
-const deleteNote = (id) =>
-  fetch(`/api/notes/${id}`, {
+const deleteNote = (id) => {
+  console.log('48');
+  return fetch(`/api/notes/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
-  });
+  })
+};
 
 const renderActiveNote = () => {
   hide(saveNoteBtn);
+
+  console.log(activeNote, '60');
 
   if (activeNote.id) {
     noteTitle.setAttribute('readonly', true);
@@ -96,11 +67,11 @@ const renderActiveNote = () => {
   } else {
     noteTitle.value = '';
     noteText.value = '';
+    window.location.reload();
   }
 };
 
 const handleNoteSave = () => {
-  console.log("Save");
   const newNote = {
     title: noteTitle.value,
     text: noteText.value,
@@ -118,6 +89,8 @@ const handleNoteDelete = (e) => {
 
   const note = e.target;
   const noteId = JSON.parse(note.parentElement.getAttribute('data-note')).id;
+
+  console.log(activeNote, noteId);
 
   if (activeNote.id === noteId) {
     activeNote = {};
@@ -153,7 +126,7 @@ const handleRenderSaveBtn = () => {
 // Render the list of note titles
 const renderNoteList = async (notes) => {
   let jsonNotes = await notes.json();
-  if (window.location.pathname === '/notes') {
+  if (window.location.pathname === '/notes.html') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
 
@@ -198,13 +171,22 @@ const renderNoteList = async (notes) => {
     noteListItems.push(li);
   });
 
-  if (window.location.pathname === '/notes') {
+  if (window.location.pathname === '/notes.html') {
     noteListItems.forEach((note) => noteList[0].append(note));
   }
 };
 
+
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
+if (window.location.pathname === '/notes.html') {
+  saveNoteBtn.addEventListener('click', handleNoteSave);
+  newNoteBtn.addEventListener('click', handleNewNoteView);
+  noteTitle.addEventListener('keyup', handleRenderSaveBtn);
+  noteText.addEventListener('keyup', handleRenderSaveBtn);
+}
 
 getAndRenderNotes();
+
+

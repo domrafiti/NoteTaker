@@ -1,16 +1,14 @@
-const fs = require('fs');
+//dev dependencies
 const express = require('express');
 const app = express();
-const routes = require("./routes/routes.js");
-
-
+//port
 const PORT = process.env.PORT || 8080;
-
-app.use(express.urlencoded({ extended: true }));
-//makes public folder available for front end.
+//middleware
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-//defining routes
-app.use(routes);
-
+//linking route files for API and HTML routing
+require('./routes/routes')(app);
+require('./routes/htmlRoute')(app);
+//always listening
 app.listen(PORT, () => console.log(`App listening on PORT http://localhost:${PORT}`));
